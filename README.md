@@ -11,6 +11,7 @@ The plugins handle the SOAP/XML **Request** and/or the SOAP/XML **Response** in 
 2) ```XSD VALIDATION```: Validate XML request with its XSD schema
 3) ```XSLT TRANSFORMATION - AFTER XSD```: Transform the XML request with XSLT (XSLTransformation) after XSD Validation (step #2)
 4) ```ROUTING BY XPATH```: change the Route of the request to a different hostname and path depending of XPath condition
+5) ```EXTRACT OPERATION```: get the operation from SOAP 1.2 and add header SOAPAction for routing. Keeps the 1.1 SOAPAction if present.
 
 **soap-xml-response-handling** plugin to handle Reponse:
 
@@ -407,6 +408,11 @@ Content-Length: 185
   </soap:Body>
 </soap:Envelope>
 ```
+### Example #9: Request | Use a SOAP 1.2 WebService
+1) Create a Kong Service
+2) Add the ```soap-xml-request-handling``` plugin and and configure the plugin with:
+- ```RouteXPath``` property with this ```//soap:Body/*[1]```
+- ```extractOperation``` ticked
 
 ## Changelog
 - v1.0.0:
