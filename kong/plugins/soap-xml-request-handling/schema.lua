@@ -16,6 +16,7 @@ return {
           { RouteXPathCondition = { type = "string", required = false }, },
           { RouteXPathRegisterNs = { type = "array",  required = false, elements = {type = "string"}, default = {"soap,http://schemas.xmlsoap.org/soap/envelope/"}},},
           { VerboseRequest = { type = "boolean", required = false }, },
+          { extractOperation = { type = "boolean", required = false }, },
           { xsdApiSchema = { type = "string", required = false }, },
           { xsdSoapSchema = { type = "string", required = false, default = xmldefinition.XSD_SOAP }, },
           { xsltTransformAfter = { type = "string", required = false }, },

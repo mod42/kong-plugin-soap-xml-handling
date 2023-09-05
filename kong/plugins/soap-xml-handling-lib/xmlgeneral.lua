@@ -474,6 +474,88 @@ function xmlgeneral.XMLValidateWithXSD (plugin_conf, child, XMLtoValidate, XSDSc
   return errMessage
 end
 
+function xmlgeneral.extractByXPath(kong, XMLtoSearch, XPath, XPathRegisterNs)
+  local xmlua = require("xmlua")
+  local document = xmlua.XML.parse(XMLtoSearch)
+
+  local object = document:search(XPath)
+
+  if object ~= NULL then
+  -- You can use "#" for getting the number of matched nodes
+    kong.log.debug("number of :" ..#object) -- -> 3
+    
+    local operation = object[1]:name()
+    kong.log.debug("body: " .. operation)
+
+    return operation
+  else
+    kong.log.err("expression: " .. XPath .. " Not found")
+  end
+end
+
+-- function xmlgeneral.extractByXPath(kong, XMLtoSearch, XPath, XPathRegisterNs)
+--   local ffi         = require("ffi")
+--   local libxml2ex   = require("kong.plugins.soap-xml-handling-lib.libxml2ex")
+--   local libxml2     = require("xmlua.libxml2")
+
+--   local context = libxml2.xmlNewParserCtxt()
+--   local document = libxml2.xmlCtxtReadMemory(context, XMLtoSearch)
+  
+--   if not document then
+--     kong.log.err ("RouteByXPath, xmlCtxtReadMemory error, no document")
+--   end
+  
+  
+--   local context = libxml2.xmlXPathNewContext(document)
+  
+
+--   local context = libxml2.xmlXPathNewContext(document)
+  
+--   -- Register NameSpace(s)
+--   kong.log.debug("XPathRegisterNs length: " .. #XPathRegisterNs)
+  
+--   -- Go on each NameSpace definition
+--   local context = libxml2.xmlXPathNewContext(document)
+--   for i = 1, #XPathRegisterNs do
+--     local prefix, uri
+--     local j = XPathRegisterNs[i]:find(',', 1)
+--     if j then
+--       prefix  = string.sub(XPathRegisterNs[i], 1, j - 1)
+--       uri     = string.sub(XPathRegisterNs[i], j + 1, #XPathRegisterNs[i])
+--     end
+--     local rc = false
+--     if prefix and uri then
+--       -- Register NameSpace
+--       rc = libxml2.xmlXPathRegisterNs(context, prefix, uri)
+--     end
+--     if rc then
+--       kong.log.debug("RouteByXPath, successful registering NameSpace for '" .. XPathRegisterNs[i] .. "'")
+--     else
+--       kong.log.err("RouteByXPath, failure registering NameSpace for '" .. XPathRegisterNs[i] .. "'")
+--     end
+--   end
+
+
+--   kong.log.debug ("RouteByXPath, XPath is " .. XPath)
+  
+--   local object = libxml2.xmlXPathEvalExpression(XPath, context)
+
+--   if object ~= ffi.NULL then
+--     -- If we found the XPath element
+--     if object.nodesetval ~= ffi.NULL and object.nodesetval.nodeNr ~= 0 then        
+--         local nodeContent = libxml2.xmlNodeGetContent(object.nodesetval.nodeTab[0])
+--         kong.log.debug("libxml2.xmlNodeGetContent: " .. nodeContent)
+--         rcXpath = true
+--     else
+--       kong.log.debug ("RouteByXPath, object.nodesetval is null")  
+--     end
+--   else
+--     kong.log.debug ("RouteByXPath, object is null")
+--   end
+
+--   return
+-- end
+
 ---------------------------------------------
 -- Search a XPath and Compares it to a value
 ---------------------------------------------
@@ -519,7 +601,7 @@ function xmlgeneral.RouteByXPath (kong, XMLtoSearch, XPath, XPathCondition, XPat
 
   local object = libxml2.xmlXPathEvalExpression(XPath, context)
   if object ~= ffi.NULL then
-    
+
     -- If we found the XPath element
     if object.nodesetval ~= ffi.NULL and object.nodesetval.nodeNr ~= 0 then        
         local nodeContent = libxml2.xmlNodeGetContent(object.nodesetval.nodeTab[0])

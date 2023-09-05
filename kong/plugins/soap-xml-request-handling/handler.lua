@@ -18,6 +18,20 @@ function plugin:requestSOAPXMLhandling(plugin_conf, soapEnvelope)
 
   soapEnvelope_transformed = soapEnvelope
 
+  if plugin_conf.extractOperation and soapFaultBody == nil and plugin_conf.RouteXPath then
+    kong.log.debug("Inside extract ...")
+    -- check for SOAPAction
+    local soapAction = kong.request.get_header("SOAPAction")
+      if soapAction == NULL then
+
+      local operation = xmlgeneral.extractByXPath (kong, soapEnvelope_transformed, 
+                                              plugin_conf.RouteXPath, plugin_conf.RouteXPathRegisterNs)
+      kong.service.request.add_header("SOAPAction",operation)
+      kong.log.debug("Added header Soapaction : " .. operation)
+    end
+  end
+
+
   -- If there is 'XSLT Transformation Before XSD' configuration then:
   -- => we apply XSL Transformation (XSLT) Before XSD
   if plugin_conf.xsltTransformBefore then
