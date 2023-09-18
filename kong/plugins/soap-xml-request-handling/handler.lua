@@ -62,6 +62,7 @@ function plugin:requestSOAPXMLhandling(plugin_conf, soapEnvelope)
   -- => we validate the API XML (included in the <soap:envelope>) with its schema
   if soapFaultBody == nil and plugin_conf.xsdApiSchema then
     -- errMessage = xmlgeneral.XMLValidateWithXSD (plugin_conf, 2, soapEnvelope_transformed, plugin_conf.xsdApiSchema)
+    kong.log.debug("before XMLValidateWithWSDL") 
     errMessage = xmlgeneral.XMLValidateWithWSDL (plugin_conf, 2, soapEnvelope_transformed, plugin_conf.xsdApiSchema, plugin_conf.VerboseRequest)
     if errMessage ~= nil then
         -- Format a Fault code to Client
@@ -69,6 +70,7 @@ function plugin:requestSOAPXMLhandling(plugin_conf, soapEnvelope)
                                                     xmlgeneral.RequestTextError .. xmlgeneral.SepTextError .. xmlgeneral.XSDError,
                                                     errMessage)
     end
+    kong.log.debug("after XMLValidateWithWSDL") 
   end
 
   -- If there is 'XSLT Transformation After XSD' configuration then:

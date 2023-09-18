@@ -8,7 +8,9 @@ require("xmlua.libxml2.xmlerror")
 
 local ffi = require("ffi")
 local loaded, xml2 = pcall(ffi.load, "xml2")
+kong.log.debug("_G.jit.os " .. _G.jit.os )
 if not loaded then
+  kong.log.debug("xml2 was not loaded, loading lib ")
   if _G.jit.os == "Windows" then
     xml2 = ffi.load("libxml2-2.dll")
   else

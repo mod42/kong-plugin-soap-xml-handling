@@ -204,8 +204,7 @@ function xmlgeneral.XSLTransform(plugin_conf, XMLtoTransform, XSLT, verbose)
   kong.log.debug("XSLT transformation, BEGIN: " .. XMLtoTransform)
   
   local default_parse_options = bit.bor(ffi.C.XML_PARSE_NOERROR,
-                                        ffi.C.XML_PARSE_NOWARNING,
-                                        ffi.C.XML_PARSE_NONET)
+                                        ffi.C.XML_PARSE_NOWARNING)
                                         
   -- Load the XSLT document
   local xslt_doc, errMessage = libxml2ex.xmlReadMemory(XSLT, nil, nil, default_parse_options, verbose)
@@ -278,6 +277,9 @@ function xmlgeneral.XMLValidateWithWSDL (plugin_conf, child, XMLtoValidate, WSDL
   local validSchemaFound  = false
   local nodeName          = ""
   local index             = 0
+
+  local default_parse_options = bit.bor(ffi.C.XML_PARSE_NOENT,
+        ffi.C.XML_PARSE_NOWARNING)
   
   -- If we have a WDSL file, we retrieve the '<wsdl:types>' Node AND the '<xs:schema>' child nodes 
   --   OR
@@ -302,7 +304,7 @@ function xmlgeneral.XMLValidateWithWSDL (plugin_conf, child, XMLtoValidate, WSDL
   --  </wsdl:message>
 
   -- Parse an XML in-memory document and build a tree
-  xml_doc, errMessage = libxml2ex.xmlReadMemory(WSDL, nil, nil, 0, verbose)
+  xml_doc, errMessage = libxml2ex.xmlReadMemory(WSDL, nil, nil, default_parse_options, verbose)
   if errMessage then
     errMessage = "WSDL validation, errMessage " .. errMessage
     kong.log.err (errMessage)
@@ -399,6 +401,11 @@ function xmlgeneral.XMLValidateWithXSD (plugin_conf, child, XMLtoValidate, XSDSc
   local is_valid      = 0
   local schemaType    = ""
   
+  local default_parse_options = bit.bor(ffi.C.XML_PARSE_NOENT,
+  ffi.C.XML_PARSE_NOWARNING)
+
+  --   local default_parse_options = bit.bor(ffi.C.XML_PARSE_NOENT, ffi.C.XML_PARSE_NOWARNING, ffi.C.XML_PARSE_DTDLOAD)
+
   -- Prepare the error Message
   if child == 0 then
     schemaType = "SOAP"
@@ -406,19 +413,21 @@ function xmlgeneral.XMLValidateWithXSD (plugin_conf, child, XMLtoValidate, XSDSc
     schemaType = "API"
   end
 
+  
+
   -- Create Parser Context
   local xsd_context = libxml2ex.xmlSchemaNewMemParserCtxt(XSDSchema)
-  
+  kong.log.debug("after xmlSchemaNewMemParserCtxt")
   -- Create XSD schema
   local xsd_schema_doc, errMessage = libxml2ex.xmlSchemaParse(xsd_context, verbose)
-  
+  kong.log.debug("after xmlSchemaParse")  
   -- If there is no error loading the XSD schema
   if not errMessage then
     
     -- Create Validation context of XSD Schema
     local validation_context = libxml2ex.xmlSchemaNewValidCtxt(xsd_schema_doc)
-
-    xml_doc, errMessage = libxml2ex.xmlReadMemory(XMLtoValidate, nil, nil, 0 , verbose)
+    kong.log.debug("after xmlSchemaNewValidCtxt")  
+    xml_doc, errMessage = libxml2ex.xmlReadMemory(XMLtoValidate, nil, nil, default_parse_options, verbose)
     
     -- If there is an error on 'xmlReadMemory' call
     if errMessage then
