@@ -279,7 +279,7 @@ function xmlgeneral.XMLValidateWithWSDL (plugin_conf, child, XMLtoValidate, WSDL
   local index             = 0
 
   local default_parse_options = bit.bor(ffi.C.XML_PARSE_NOENT,
-        ffi.C.XML_PARSE_NOWARNING)
+        ffi.C.XML_PARSE_NOWARNING, ffi.C.XML_PARSE_DTDLOAD)
   
   -- If we have a WDSL file, we retrieve the '<wsdl:types>' Node AND the '<xs:schema>' child nodes 
   --   OR
@@ -368,6 +368,7 @@ function xmlgeneral.XMLValidateWithWSDL (plugin_conf, child, XMLtoValidate, WSDL
         kong.log.debug ("schema #" .. index .. ", lentgh: " .. #xsdSchema .. ", dump: " .. xsdSchema)
         errMessage = nil
         -- Validate the XML with the <xs:schema>'
+        kong.log.debug("Just before calling XMLValidateWithXSD")
         errMessage = xmlgeneral.XMLValidateWithXSD (plugin_conf, child, XMLtoValidate, xsdSchema, verbose)
         -- If there is no error it means that we found the right Schema validating the SOAP/XML
         if not errMessage then
