@@ -18,20 +18,6 @@ function plugin:requestSOAPXMLhandling(plugin_conf, soapEnvelope)
 
   soapEnvelope_transformed = soapEnvelope
 
-  if plugin_conf.extractOperation and soapFaultBody == nil and plugin_conf.RouteXPath then
-    kong.log.debug("Inside extract ...")
-    -- check for SOAPAction
-    local soapAction = kong.request.get_header("SOAPAction")
-      if soapAction == NULL then
-
-      local operation = xmlgeneral.extractByXPath (kong, soapEnvelope_transformed, 
-                                              plugin_conf.RouteXPath, plugin_conf.RouteXPathRegisterNs)
-      kong.service.request.add_header("SOAPAction",operation)
-      kong.log.debug("Added header Soapaction : " .. operation)
-    end
-  end
-
-
   -- If there is 'XSLT Transformation Before XSD' configuration then:
   -- => we apply XSL Transformation (XSLT) Before XSD
   if plugin_conf.xsltTransformBefore then
@@ -200,5 +186,28 @@ function plugin:body_filter(plugin_conf)
       kong.response.set_raw_body(kong.ctx.shared.xmlSoapHandlingFault.soapEnvelope)
   end
 end
+
+function plugin:rewrite(plugin_conf)
+
+  local xmlgeneral = require("kong.plugins.soap-xml-handling-lib.xmlgeneral")
+  xmlgeneral.initializeErrorHandler (plugin_conf)
+
+  local soapEnvelope= kong.request.get_raw_body()
+
+  if plugin_conf.extractOperation and soapFaultBody == nil and plugin_conf.RouteXPath then
+    kong.log.debug("Inside extract ...")
+    -- check for SOAPAction
+    local soapAction = kong.request.get_header("SOAPAction")
+      if soapAction == NULL then
+
+      local operation = xmlgeneral.extractByXPath (kong, soapEnvelope, 
+                                              plugin_conf.RouteXPath, plugin_conf.RouteXPathRegisterNs)
+      kong.service.request.add_header("SOAPAction",operation)
+      kong.log.debug("Added header Soapaction : " .. operation)
+    end
+  end
+
+end
+
 
 return plugin
